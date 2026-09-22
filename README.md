@@ -95,18 +95,16 @@ Deux façons, au choix :
   → **Markdown**), déposez le fichier dans votre dossier Syncthing local sur
   le PC. Notez que l'export AppFlowy **n'inclut pas** le contenu des
   sous-pages — exportez chaque page qui contient réellement du texte.
-- **Depuis le site** : cliquez sur le bouton **Éditer** en haut à droite (ou
-  allez directement sur `http://<ip-du-nas>:8091/editor/`), créez ou éditez
-  un fichier directement dans le navigateur.
+- **Depuis le site** :
+  - Bouton **Nouveau fichier** (en haut à droite) : demande un nom, crée le
+    `.md` (l'extension est ajoutée automatiquement si vous l'oubliez) et
+    ouvre directement son édition.
+  - Bouton **Éditer** : ouvre en édition directe la page que vous êtes en
+    train de lire (pas juste la liste de fichiers).
 
 Dans les deux cas, aucune autre étape : pas de commit, pas de rebuild, pas de
 `_sidebar.md` à toucher. Le fichier apparaît sur le site (menu inclus) sous
 15 secondes, et se synchronise vers votre PC (ou l'inverse) via Syncthing.
-
-⚠️ FileBrowser ne force pas l'extension `.md` sur "New file" — pensez à la
-taper vous-même (ex: `ma-note.md`). Un fichier sans extension `.md` ne sera
-simplement pas repris dans le menu du site (mais restera visible/éditable
-dans l'éditeur).
 
 ## Exporter une note en PDF
 

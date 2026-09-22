@@ -57,10 +57,73 @@
 <body>
 	<div id="app"></div>
 	<div class="toolbar">
-		<a href="/editor/" target="_blank" rel="noopener">Éditer</a>
+		<button type="button" id="new-note-btn">Nouveau fichier</button>
+		<a href="/editor/" target="_blank" rel="noopener" id="edit-link">Éditer</a>
 		<button type="button" onclick="window.print()">Exporter en PDF</button>
 	</div>
 	<script>
+		var FB_SOURCE = "Archives";
+
+		function currentNotePath() {
+			var hash = window.location.hash || "#/";
+			var path = decodeURIComponent(hash.replace(/^#\/?/, "").split("?")[0]);
+			if (!path) path = "README.md";
+			else if (!/\.md$/i.test(path)) path += ".md";
+			return path;
+		}
+
+		function editorUrlFor(path) {
+			var encoded = path
+				.split("/")
+				.map(function (seg) {
+					return encodeURIComponent(seg);
+				})
+				.join("/");
+			return "/editor/files/" + FB_SOURCE + "/" + encoded + "#edit";
+		}
+
+		function updateEditLink() {
+			var link = document.getElementById("edit-link");
+			if (link) link.href = editorUrlFor(currentNotePath());
+		}
+
+		async function createNewNote() {
+			var name = window.prompt(
+				"Nom du nouveau fichier (ex: mon-dossier/ma-note.md) :",
+				".md",
+			);
+			if (!name) return;
+			if (!/\.md$/i.test(name)) name += ".md";
+			var encoded = name
+				.split("/")
+				.map(function (seg) {
+					return encodeURIComponent(seg);
+				})
+				.join("/");
+			try {
+				var res = await fetch(
+					"/editor/api/resources?" +
+						new URLSearchParams({
+							path: "/" + name,
+							source: FB_SOURCE,
+							override: "false",
+						}),
+					{ method: "POST", headers: { "Content-Type": "text/plain" }, body: "" },
+				);
+				if (!res.ok) {
+					alert("Échec de la création (" + res.status + "). Existe-t-il déjà ?");
+					return;
+				}
+				window.location.href = "/editor/files/" + FB_SOURCE + "/" + encoded + "#edit";
+			} catch (e) {
+				alert("Erreur réseau lors de la création du fichier.");
+			}
+		}
+
+		document.getElementById("new-note-btn").addEventListener("click", createNewNote);
+		window.addEventListener("hashchange", updateEditLink);
+		updateEditLink();
+
 		window.$docsify = {
 			name: "Archives de cours",
 			basePath: "/notes/",
@@ -71,6 +134,11 @@
 			search: "auto",
 			formatUpdated: "{DD}/{MM}/{YYYY}",
 			plugins: [
+				function (hook) {
+					hook.doneEach(function () {
+						updateEditLink();
+					});
+				},
 				function (hook) {
 					hook.beforeEach(function (content, next) {
 						var fm = content.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
