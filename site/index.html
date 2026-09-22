@@ -26,10 +26,40 @@
 			filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
 		}
 		.page-cover + .page-icon { margin-top: -50px; }
+
+		.toolbar {
+			position: fixed;
+			top: 12px;
+			right: 16px;
+			z-index: 20;
+			display: flex;
+			gap: 8px;
+		}
+		.toolbar a, .toolbar button {
+			font: inherit;
+			font-size: 14px;
+			padding: 6px 12px;
+			border-radius: 6px;
+			border: 1px solid #3a3d45;
+			background: #1f2228;
+			color: #e4e4e7;
+			text-decoration: none;
+			cursor: pointer;
+		}
+		.toolbar a:hover, .toolbar button:hover { background: #2a2e36; }
+
+		@media print {
+			.toolbar, .sidebar, .sidebar-toggle, .search { display: none !important; }
+			.content { left: 0 !important; }
+		}
 	</style>
 </head>
 <body>
 	<div id="app"></div>
+	<div class="toolbar">
+		<a href="/editor/" target="_blank" rel="noopener">Éditer</a>
+		<button type="button" onclick="window.print()">Exporter en PDF</button>
+	</div>
 	<script>
 		window.$docsify = {
 			name: "Archives de cours",

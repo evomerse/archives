@@ -2,7 +2,15 @@ server:
   baseURL: "/editor"
   sources:
     - path: "/srv"
-      name: "notes"
+      name: "Archives"
 auth:
   methods:
     noauth: true
+frontend:
+  name: "Archives de cours"
+  disableDefaultLinks: true
+  disableUsedPercentage: true
+  externalLinks:
+    - text: "Retour au site"
+      title: "Retour au site de lecture"
+      url: "/"
