@@ -6,4 +6,6 @@ services:
     environment:
       BASIC_AUTH_USER: ${BASIC_AUTH_USER:-promo}
       BASIC_AUTH_PASSWORD: ${BASIC_AUTH_PASSWORD:?Définissez BASIC_AUTH_PASSWORD dans .env}
+    volumes:
+      - ${NOTES_PATH:?Définissez NOTES_PATH dans .env}:/usr/local/apache2/htdocs/notes:ro
     restart: unless-stopped

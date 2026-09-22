@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8" />
+	<title>Archives de cours</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+	<meta name="robots" content="noindex, nofollow" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" />
+	<style>
+		:root { --theme-color: #7c5cff; }
+		body { background: #16181c; color: #e4e4e7; }
+		.markdown-section pre { background: #1f2228; }
+	</style>
+</head>
+<body>
+	<div id="app"></div>
+	<script>
+		window.$docsify = {
+			name: "Archives de cours",
+			basePath: "/notes/",
+			homepage: "README.md",
+			loadSidebar: true,
+			subMaxLevel: 3,
+			auto2top: true,
+			search: "auto",
+			formatUpdated: "{DD}/{MM}/{YYYY}",
+		};
+	</script>
+	<script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+</body>
+</html>

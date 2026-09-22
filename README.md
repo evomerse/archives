@@ -1,94 +1,81 @@
 # Archives de cours
 
-Site statique (Astro + [Starlight](https://starlight.astro.build)) publiant des
-notes exportées d'AppFlowy, servi par Apache avec une protection par mot de
-passe (Basic Auth), dans un conteneur Docker prévu pour tourner sur un NAS.
+Site qui affiche, en direct et sans étape de build, un dossier de notes
+Markdown exportées d'AppFlowy et synchronisées sur le NAS via Syncthing.
+Rendu par [Docsify](https://docsify.js.org) (JS côté client), servi par
+Apache avec une protection par mot de passe (Basic Auth).
 
-## Ajouter des notes
+Contrairement à un site généré statiquement, il n'y a **rien à rebuild** :
+déposez un fichier dans le dossier synchronisé, il apparaît sur le site au
+prochain rafraîchissement de la page.
 
-1. Dans AppFlowy, ouvrez la page à publier → menu `...` → **Export** → **Markdown**.
-2. Placez le fichier `.md` dans `src/content/docs/notes/` (sous-dossiers autorisés,
-   par ex. `src/content/docs/notes/reseaux/tp1.md`).
-3. Vérifiez que le fichier a un en-tête au minimum comme ceci :
+## Architecture
 
-   ```md
-   ---
-   title: Titre de la note
-   ---
-   ```
+- `site/` — le shell Docsify (`index.html`), baké dans l'image Docker.
+- `notes-seed/` — `README.md` et `_sidebar.md` de départ, à copier **une
+  fois** dans votre dossier synchronisé (voir plus bas).
+- Le dossier réel des notes (`notes/`) n'est **pas** dans ce dépôt : c'est un
+  volume Docker monté depuis un chemin du NAS, alimenté par Syncthing.
 
-4. Commit + push, puis sur le NAS : `git pull && docker compose up -d --build`.
+## Mise en place sur le NAS (CasaOS)
 
-## Développement local
-
-```bash
-npm install
-npm run dev
-```
-
-## Déploiement sur le NAS (Docker)
-
-1. Clonez le dépôt sur le NAS :
+1. **Installer Syncthing** depuis l'App Store CasaOS (déjà fait si vous avez
+   cliqué sur Install).
+2. Dans Syncthing, créez un dossier partagé (ex. `archives-notes`) et notez
+   son chemin réel sur le NAS (visible dans les paramètres du dossier
+   Syncthing, généralement sous `/DATA/AppData/syncthing/...` avec CasaOS).
+3. Sur votre PC, installez aussi Syncthing, ajoutez le même dossier partagé,
+   et connectez les deux appareils (QR code / ID d'appareil dans l'interface
+   Syncthing).
+4. Copiez `notes-seed/README.md` et `notes-seed/_sidebar.md` dans ce dossier
+   partagé (juste une fois, au tout début).
+5. Clonez ce dépôt sur le NAS :
 
    ```bash
    git clone https://github.com/evomerse/archives.git
    cd archives
    ```
 
-2. Créez le fichier `.env` à partir de l'exemple, changez le mot de passe et
-   choisissez un port libre sur le NAS (`8091` par défaut, à adapter si déjà pris) :
+6. Créez `.env` à partir de l'exemple :
 
    ```bash
    cp .env.example .env
    ```
 
-   ```
-   BASIC_AUTH_USER=promo
-   BASIC_AUTH_PASSWORD=votre-mot-de-passe
-   HOST_PORT=8091
-   ```
+   Éditez-le avec le vrai chemin Syncthing (`NOTES_PATH`), votre mot de passe
+   (`BASIC_AUTH_PASSWORD`) et un port libre (`HOST_PORT`).
 
-3. Build + lancement :
+7. Lancez :
 
    ```bash
    docker compose up -d --build
    ```
 
-   Le site est alors servi sur `http://<ip-du-nas>:8091` (ou le port choisi),
-   protégé par une authentification HTTP Basic (le navigateur affiche une
-   popup native de connexion — nom d'utilisateur + mot de passe définis
-   dans `.env`).
+Le site est alors sur `http://<ip-du-nas>:8091` (ou le port choisi), protégé
+par Basic Auth.
 
-4. Pour mettre à jour après avoir ajouté des notes :
+## Ajouter des notes (workflow au quotidien)
 
-   ```bash
-   git pull && docker compose up -d --build
-   ```
+1. Dans AppFlowy, exportez la page en Markdown (menu `...` → **Export** →
+   **Markdown**). Notez que l'export **n'inclut pas** le contenu des
+   sous-pages — exportez chaque page qui contient réellement du texte.
+2. Déposez le(s) fichier(s) `.md` dans votre dossier Syncthing local (sur
+   votre PC) — la sync vers le NAS est automatique.
+3. Optionnel : ajoutez une ligne dans `_sidebar.md` (à la racine du dossier
+   synchronisé) pour que la note apparaisse dans le menu. Sans ça, le fichier
+   reste consultable directement via son URL, juste absent du menu.
+4. C'est tout — pas de commit, pas de rebuild. Rafraîchissez le site.
 
-5. Pour exposer le site sur `archives.nasdenoeux.dpdns.org` via votre tunnel
-   Cloudflare existant, ajoutez une route publique dans la config du tunnel
-   pointant vers `http://localhost:8091` (ou le port choisi) — le tunnel gère
-   déjà le HTTPS et le DNS, il n'y a rien d'autre à configurer côté Apache.
+## Exposer sur `archives.nasdenoeux.dpdns.org` (tunnel Cloudflare)
 
-## Alternative sans Docker (Apache existant du NAS)
+Ajoutez une route publique dans la config du tunnel pointant vers
+`http://localhost:8091` (ou le port choisi dans `.env`).
 
-Si vous préférez ne pas passer par un conteneur, servez directement le dossier
-`dist/` (généré par `npm run build`) via l'Apache déjà présent sur le NAS :
+## Mettre à jour le site lui-même (shell Docsify, config Apache)
 
-```apache
-<Directory "/chemin/vers/archives/dist">
-    AuthType Basic
-    AuthName "Archives de cours"
-    AuthUserFile "/chemin/vers/archives/.htpasswd"
-    Require valid-user
-</Directory>
-```
-
-Générez le fichier `.htpasswd` avec :
+Ce dépôt (`site/`, `Dockerfile`, etc.) ne change pas souvent. En cas de
+modification :
 
 ```bash
-htpasswd -c /chemin/vers/archives/.htpasswd promo
+git pull && docker compose up -d --build
 ```
-
-Il faudra relancer `npm run build` (ou passer par le conteneur ci-dessus, plus
-simple) à chaque ajout de note pour régénérer `dist/`.
