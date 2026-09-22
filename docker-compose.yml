@@ -7,5 +7,17 @@ services:
       BASIC_AUTH_USER: ${BASIC_AUTH_USER:-promo}
       BASIC_AUTH_PASSWORD: ${BASIC_AUTH_PASSWORD:?Définissez BASIC_AUTH_PASSWORD dans .env}
     volumes:
-      - ${NOTES_PATH:?Définissez NOTES_PATH dans .env}:/usr/local/apache2/htdocs/notes:ro
+      - ${NOTES_PATH:?Définissez NOTES_PATH dans .env}:/usr/local/apache2/htdocs/notes
     restart: unless-stopped
+
+  editor:
+    image: gtstef/filebrowser:stable-slim
+    ports:
+      - "${EDITOR_PORT:-8092}:80"
+    volumes:
+      - ${NOTES_PATH:?Définissez NOTES_PATH dans .env}:/srv/notes
+      - editor-data:/home/filebrowser/data
+    restart: unless-stopped
+
+volumes:
+  editor-data:

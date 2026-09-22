@@ -10,6 +10,22 @@
 		:root { --theme-color: #7c5cff; }
 		body { background: #16181c; color: #e4e4e7; }
 		.markdown-section pre { background: #1f2228; }
+		.page-cover {
+			height: 220px;
+			margin: -40px -30px 30px;
+			background-size: cover;
+			background-position: center;
+			border-radius: 0 0 8px 8px;
+			position: relative;
+		}
+		.page-icon {
+			font-size: 56px;
+			line-height: 1;
+			margin: -50px 0 16px 4px;
+			position: relative;
+			filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+		}
+		.page-cover + .page-icon { margin-top: -50px; }
 	</style>
 </head>
 <body>
@@ -24,6 +40,34 @@
 			auto2top: true,
 			search: "auto",
 			formatUpdated: "{DD}/{MM}/{YYYY}",
+			plugins: [
+				function (hook) {
+					hook.beforeEach(function (content, next) {
+						var fm = content.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
+						if (!fm) {
+							next(content);
+							return;
+						}
+						var meta = {};
+						fm[1].split("\n").forEach(function (line) {
+							var m = line.match(/^(\w+):\s*(.*)$/);
+							if (m) meta[m[1]] = m[2].trim();
+						});
+						var rest = content.slice(fm[0].length);
+						var banner = "";
+						if (meta.cover) {
+							banner +=
+								'<div class="page-cover" style="background-image:url(\'' +
+								meta.cover +
+								'\')"></div>';
+						}
+						if (meta.icon) {
+							banner += '<div class="page-icon">' + meta.icon + "</div>";
+						}
+						next(banner ? banner + "\n\n" + rest : rest);
+					});
+				},
+			],
 		};
 	</script>
 	<script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>

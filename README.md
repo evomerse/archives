@@ -7,15 +7,41 @@ Apache avec une protection par mot de passe (Basic Auth).
 
 Contrairement à un site généré statiquement, il n'y a **rien à rebuild** :
 déposez un fichier dans le dossier synchronisé, il apparaît sur le site au
-prochain rafraîchissement de la page.
+prochain rafraîchissement de la page. Le menu de navigation (`_sidebar.md`)
+est **régénéré automatiquement** toutes les 15 secondes à partir des fichiers
+présents — plus besoin de le maintenir à la main, rien ne peut manquer.
+
+Un second service, **[FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser)**
+(fork activement maintenu du FileBrowser original, archivé début septembre
+2026), permet de créer/éditer les `.md` directement depuis le navigateur :
+les changements atterrissent dans le même dossier, donc se synchronisent
+automatiquement vers votre PC via Syncthing (et inversement).
 
 ## Architecture
 
 - `site/` — le shell Docsify (`index.html`), baké dans l'image Docker.
-- `notes-seed/` — `README.md` et `_sidebar.md` de départ, à copier **une
-  fois** dans votre dossier synchronisé (voir plus bas).
+- `notes-seed/` — `README.md` de départ, à copier **une fois** dans votre
+  dossier synchronisé (voir plus bas). Pas besoin de `_sidebar.md` : il est
+  généré automatiquement par le conteneur.
 - Le dossier réel des notes (`notes/`) n'est **pas** dans ce dépôt : c'est un
-  volume Docker monté depuis un chemin du NAS, alimenté par Syncthing.
+  volume Docker (lecture-écriture) monté depuis un chemin du NAS, alimenté
+  par Syncthing et éditable via FileBrowser.
+
+## Couverture et icône façon Notion
+
+En haut d'un fichier `.md`, ajoutez un bloc comme celui-ci pour afficher une
+bannière et une icône en haut de la page :
+
+```md
+---
+cover: https://images.unsplash.com/photo-xxxxx
+icon: 🎓
+---
+
+# Le reste de votre note...
+```
+
+Les deux champs sont optionnels et indépendants.
 
 ## Mise en place sur le NAS (CasaOS)
 
@@ -27,8 +53,8 @@ prochain rafraîchissement de la page.
 3. Sur votre PC, installez aussi Syncthing, ajoutez le même dossier partagé,
    et connectez les deux appareils (QR code / ID d'appareil dans l'interface
    Syncthing).
-4. Copiez `notes-seed/README.md` et `notes-seed/_sidebar.md` dans ce dossier
-   partagé (juste une fois, au tout début).
+4. Copiez `notes-seed/README.md` dans ce dossier partagé (juste une fois, au
+   tout début — c'est la page d'accueil du site).
 5. Clonez ce dépôt sur le NAS :
 
    ```bash
@@ -51,20 +77,27 @@ prochain rafraîchissement de la page.
    docker compose up -d --build
    ```
 
-Le site est alors sur `http://<ip-du-nas>:8091` (ou le port choisi), protégé
-par Basic Auth.
+Le site est alors sur `http://<ip-du-nas>:8091` (lecture) et
+`http://<ip-du-nas>:8092` (éditeur FileBrowser), protégés par mot de passe.
+
+**FileBrowser — première connexion** : identifiants par défaut `admin` /
+`admin`. Connectez-vous puis changez immédiatement le mot de passe (menu
+utilisateur en haut à droite → Settings).
 
 ## Ajouter des notes (workflow au quotidien)
 
-1. Dans AppFlowy, exportez la page en Markdown (menu `...` → **Export** →
-   **Markdown**). Notez que l'export **n'inclut pas** le contenu des
-   sous-pages — exportez chaque page qui contient réellement du texte.
-2. Déposez le(s) fichier(s) `.md` dans votre dossier Syncthing local (sur
-   votre PC) — la sync vers le NAS est automatique.
-3. Optionnel : ajoutez une ligne dans `_sidebar.md` (à la racine du dossier
-   synchronisé) pour que la note apparaisse dans le menu. Sans ça, le fichier
-   reste consultable directement via son URL, juste absent du menu.
-4. C'est tout — pas de commit, pas de rebuild. Rafraîchissez le site.
+Deux façons, au choix :
+
+- **Depuis AppFlowy** : exportez la page en Markdown (menu `...` → **Export**
+  → **Markdown**), déposez le fichier dans votre dossier Syncthing local sur
+  le PC. Notez que l'export AppFlowy **n'inclut pas** le contenu des
+  sous-pages — exportez chaque page qui contient réellement du texte.
+- **Depuis le site** : ouvrez FileBrowser (`http://<ip-du-nas>:8092`), créez
+  ou éditez un `.md` directement dans le navigateur.
+
+Dans les deux cas, aucune autre étape : pas de commit, pas de rebuild, pas de
+`_sidebar.md` à toucher. Le fichier apparaît sur le site (menu inclus) sous
+15 secondes, et se synchronise vers votre PC (ou l'inverse) via Syncthing.
 
 ## Exposer sur `archives.nasdenoeux.dpdns.org` (tunnel Cloudflare)
 
