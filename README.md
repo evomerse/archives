@@ -35,7 +35,8 @@ npm run dev
    cd archives
    ```
 
-2. Créez le fichier `.env` à partir de l'exemple et changez le mot de passe :
+2. Créez le fichier `.env` à partir de l'exemple, changez le mot de passe et
+   choisissez un port libre sur le NAS (`8091` par défaut, à adapter si déjà pris) :
 
    ```bash
    cp .env.example .env
@@ -44,6 +45,7 @@ npm run dev
    ```
    BASIC_AUTH_USER=promo
    BASIC_AUTH_PASSWORD=votre-mot-de-passe
+   HOST_PORT=8091
    ```
 
 3. Build + lancement :
@@ -52,9 +54,10 @@ npm run dev
    docker compose up -d --build
    ```
 
-   Le site est alors servi sur `http://<ip-du-nas>:8080`, protégé par une
-   authentification HTTP Basic (le navigateur affiche une popup native de
-   connexion — nom d'utilisateur + mot de passe définis dans `.env`).
+   Le site est alors servi sur `http://<ip-du-nas>:8091` (ou le port choisi),
+   protégé par une authentification HTTP Basic (le navigateur affiche une
+   popup native de connexion — nom d'utilisateur + mot de passe définis
+   dans `.env`).
 
 4. Pour mettre à jour après avoir ajouté des notes :
 
@@ -62,11 +65,10 @@ npm run dev
    git pull && docker compose up -d --build
    ```
 
-5. Pour exposer le site sur `archives.nasdenoeux.dpdns.org` (au lieu de
-   `http://<ip-du-nas>:8080`), faites pointer votre reverse proxy (l'Apache
-   existant du NAS, ou un tunnel Cloudflare) vers le port `8080` du conteneur.
-   Le conteneur écoute déjà en HTTP simple ; c'est le reverse proxy qui gère le
-   HTTPS et le nom de domaine.
+5. Pour exposer le site sur `archives.nasdenoeux.dpdns.org` via votre tunnel
+   Cloudflare existant, ajoutez une route publique dans la config du tunnel
+   pointant vers `http://localhost:8091` (ou le port choisi) — le tunnel gère
+   déjà le HTTPS et le DNS, il n'y a rien d'autre à configurer côté Apache.
 
 ## Alternative sans Docker (Apache existant du NAS)
 

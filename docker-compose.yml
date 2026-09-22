@@ -2,7 +2,7 @@ services:
   archives:
     build: .
     ports:
-      - "8080:80"
+      - "${HOST_PORT:-8091}:80"
     environment:
       BASIC_AUTH_USER: ${BASIC_AUTH_USER:-promo}
       BASIC_AUTH_PASSWORD: ${BASIC_AUTH_PASSWORD:?Définissez BASIC_AUTH_PASSWORD dans .env}
