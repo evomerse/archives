@@ -1,0 +1,8 @@
+server:
+  baseURL: "/editor"
+  sources:
+    - path: "/srv"
+      name: "notes"
+auth:
+  methods:
+    noauth: true

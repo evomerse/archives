@@ -15,7 +15,9 @@ Un second service, **[FileBrowser Quantum](https://github.com/gtsteffaniak/fileb
 (fork activement maintenu du FileBrowser original, archivé début septembre
 2026), permet de créer/éditer les `.md` directement depuis le navigateur :
 les changements atterrissent dans le même dossier, donc se synchronisent
-automatiquement vers votre PC via Syncthing (et inversement).
+automatiquement vers votre PC via Syncthing (et inversement). Il est exposé
+sous `/editor/`, derrière le même Apache et le même mot de passe que le
+site — un seul port, une seule authentification.
 
 ## Architecture
 
@@ -26,6 +28,9 @@ automatiquement vers votre PC via Syncthing (et inversement).
 - Le dossier réel des notes (`notes/`) n'est **pas** dans ce dépôt : c'est un
   volume Docker (lecture-écriture) monté depuis un chemin du NAS, alimenté
   par Syncthing et éditable via FileBrowser.
+- `filebrowser/config.yaml` — configure FileBrowser Quantum pour tourner sous
+  `/editor/` et désactive son propre écran de connexion (`noauth`), puisque
+  Apache protège déjà tout par mot de passe en amont.
 
 ## Couverture et icône façon Notion
 
@@ -77,12 +82,10 @@ Les deux champs sont optionnels et indépendants.
    docker compose up -d --build
    ```
 
-Le site est alors sur `http://<ip-du-nas>:8091` (lecture) et
-`http://<ip-du-nas>:8092` (éditeur FileBrowser), protégés par mot de passe.
-
-**FileBrowser — première connexion** : identifiants par défaut `admin` /
-`admin`. Connectez-vous puis changez immédiatement le mot de passe (menu
-utilisateur en haut à droite → Settings).
+Le site est alors sur `http://<ip-du-nas>:8091` — un seul port, protégé par
+le mot de passe défini dans `.env`. L'éditeur est sur ce même port, à
+`http://<ip-du-nas>:8091/editor/` (même mot de passe, pas de connexion
+séparée à faire).
 
 ## Ajouter des notes (workflow au quotidien)
 
@@ -92,8 +95,8 @@ Deux façons, au choix :
   → **Markdown**), déposez le fichier dans votre dossier Syncthing local sur
   le PC. Notez que l'export AppFlowy **n'inclut pas** le contenu des
   sous-pages — exportez chaque page qui contient réellement du texte.
-- **Depuis le site** : ouvrez FileBrowser (`http://<ip-du-nas>:8092`), créez
-  ou éditez un `.md` directement dans le navigateur.
+- **Depuis le site** : ouvrez `http://<ip-du-nas>:8091/editor/`, créez ou
+  éditez un `.md` directement dans le navigateur.
 
 Dans les deux cas, aucune autre étape : pas de commit, pas de rebuild, pas de
 `_sidebar.md` à toucher. Le fichier apparaît sur le site (menu inclus) sous

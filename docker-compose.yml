@@ -12,11 +12,10 @@ services:
 
   editor:
     image: gtstef/filebrowser:stable-slim
-    ports:
-      - "${EDITOR_PORT:-8092}:80"
     volumes:
-      - ${NOTES_PATH:?Définissez NOTES_PATH dans .env}:/srv/notes
+      - ${NOTES_PATH:?Définissez NOTES_PATH dans .env}:/srv
       - editor-data:/home/filebrowser/data
+      - ./filebrowser/config.yaml:/home/filebrowser/data/config.yaml:ro
     restart: unless-stopped
 
 volumes:
