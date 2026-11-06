@@ -113,7 +113,7 @@ site : ouvre la boîte de dialogue d'impression du navigateur (choisissez
 "Enregistrer en PDF" comme imprimante). Le menu et les boutons sont
 automatiquement masqués à l'impression.
 
-## Exposer sur `archives.nasdenoeux.dpdns.org` (tunnel Cloudflare)
+## Exposer sur `archives.serveur.com` (tunnel Cloudflare)
 
 Ajoutez une route publique dans la config du tunnel pointant vers
 `http://localhost:8091` (ou le port choisi dans `.env`).
